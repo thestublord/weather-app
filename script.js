@@ -1,22 +1,23 @@
-// Function to simulate hitting the API
+// Function to fetch weather data using Weather API
 async function fetchWeather(location) {
-    // Simulate API delay
-    await new Promise(resolve => setTimeout(resolve, 2000));
+    const apiKey = 'dea82afc531e483d88b84731232609';
+    const url = `https://api.weatherapi.com/v1/current.json?key=${apiKey}&q=${location}`;
     
-    // Simulated JSON response from API
-    return {
-      location: location,
-      temperature: Math.random() * 100,
-      condition: 'Sunny'
-    };
+    const response = await fetch(url);
+    
+    if (!response.ok) {
+      throw new Error('Failed to fetch weather data');
+    }
+    
+    return await response.json();
   }
   
   // Function to process API response and return required data
   function processWeatherData(data) {
     return {
-      location: data.location,
-      temperature: data.temperature.toFixed(2),
-      condition: data.condition
+      location: data.location.name,
+      temperature: data.current.temp_c, // Temperature in Celsius
+      condition: data.current.condition.text
     };
   }
   
@@ -34,16 +35,23 @@ async function fetchWeather(location) {
       
       const location = document.getElementById('location-input').value;
       
-      // Fetch and process data
-      const rawData = await fetchWeather(location);
-      const processedData = processWeatherData(rawData);
-      
-      // Hide loading
-      loading.classList.add('hidden');
-      
-      // Display data
-      weatherInfo.textContent = `Location: ${processedData.location}, Temperature: ${processedData.temperature}, Condition: ${processedData.condition}`;
-      weatherInfo.classList.remove('hidden');
+      try {
+        // Fetch and process data
+        const rawData = await fetchWeather(location);
+        const processedData = processWeatherData(rawData);
+        
+        // Hide loading
+        loading.classList.add('hidden');
+        
+        // Display data
+        weatherInfo.textContent = `Location: ${processedData.location}, Temperature: ${processedData.temperature}°C, Condition: ${processedData.condition}`;
+        weatherInfo.classList.remove('hidden');
+      } catch (error) {
+        // Hide loading and show error
+        loading.classList.add('hidden');
+        weatherInfo.textContent = 'Failed to fetch weather data';
+        weatherInfo.classList.remove('hidden');
+      }
     });
   });
   
